@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ciber-Runner: Desvie das Ameaças</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+        <!-- Menu Principal -->
+        <div id="main-menu" class="ui-layer">
+            <h1 class="glitch-title">CIBER-RUNNER</h1>
+            <p class="subtitle">Desvie das ameaças digitais e proteja seus dados!</p>
+            <div class="menu-buttons">
+                <button id="btn-play" class="cyber-btn">JOGAR</button>
+                <button id="btn-how" class="cyber-btn">COMO JOGAR</button>
+                <button id="btn-about" class="cyber-btn">SOBRE</button>
+            </div>
+            <div class="audio-toggle">
+                <button id="btn-sound" class="icon-btn">🔊 Som: ON</button>
+            </div>
+        </div>
+
+        <!-- HUD (Durante a partida) -->
+        <div id="hud" class="ui-layer hidden">
+            <div class="hud-top">
+                <div id="lives-display">❤️ ❤️ ❤️</div>
+                <div id="score-display">PONTOS: 0</div>
+            </div>
+            <div class="hud-bottom">
+                <div>
+                    <div id="combo-display">COMBO: x1</div>
+                    <div id="shield-bar-container" class="bar-outer hidden">
+                        <div id="shield-bar-inner"></div>
+                    </div>
+                </div>
+                <div id="distance-display">0m</div>
+            </div>
+        </div>
+
+        <!-- Tela de Game Over -->
+        <div id="game-over-screen" class="ui-layer hidden">
+            <h1 class="game-over-title">SISTEMA COMPROMETIDO!</h1>
+            <p class="game-over-msg">Suas defesas falharam diante das ameaças virtuais.</p>
+            <div class="score-card">
+                <p>Pontuação: <span id="final-score" class="highlight">0</span></p>
+                <p>Distância: <span id="final-distance" class="highlight">0m</span></p>
+                <p>Recorde: <span id="high-score" class="highlight">0</span></p>
+            </div>
+            <div class="menu-buttons">
+                <button id="btn-restart" class="cyber-btn">JOGAR NOVAMENTE</button>
+                <button id="btn-main-menu" class="cyber-btn">MENU PRINCIPAL</button>
+            </div>
+        </div>
+
+        <!-- Modal Como Jogar (Com Imagens dos Itens) -->
+ <!-- Modal Como Jogar (História do Cypher + Grid de Itens) -->
+        <div id="modal-how" class="ui-layer hidden">
+            <div class="modal-card">
+                <h2>HISTÓRIA & COMO JOGAR</h2>
+                
+                <!-- Lore do Cypher -->
+                <div class="lore-box">
+                    <p>Em um mundo digital chamado <b>CiberMundo</b>, diversas ameaças começaram a corromper o mundo, espalhando vírus e explorando senhas fracas</p>
+                    <p>Para proteger esse mundo, surgiu <b>Cypher</b>, um guardião digital criado para combater ameaças e manter sistemas seguros</p>
+                    <p class="lore-highlight">Agora, Cypher precisa atravessar os setores da rede antes que eles sejam completamente corrompidos!</p>
+                </div>
+
+                <div class="how-to-grid">
+                    <div class="how-section danger">
+                        <h3>⚠️ Ameaças (Evite!)</h3>
+                        <div class="item-list">
+                            <div class="item-row"><img src="/static/images/virus.png" alt="Vírus"> <span><b>Vírus:</b> Danifica o sistema</span></div>
+                            <div class="item-row"><img src="/static/images/phishing.png" alt="Phishing"> <span><b>Phishing:</b> Roubo de dados</span></div>
+                            <div class="item-row"><img src="/static/images/lock-open.png" alt="Senha Fraca"> <span><b>Senha Fraca:</b> Vazio de segurança</span></div>
+                        </div>
+                    </div>
+                    <div class="how-section safe">
+                        <h3>🛡️ Defesas (Colete!)</h3>
+                        <div class="item-list">
+                            <div class="item-row"><img src="/static/images/shield-2fa.png" alt="2FA"> <span><b>2FA:</b> Escudo temporário</span></div>
+                            <div class="item-row"><img src="/static/images/antivirus.png" alt="Antivírus"> <span><b>Antivírus:</b> Limpa a tela</span></div>
+                            <div class="item-row"><img src="/static/images/lock-closed.png" alt="Cadeado"> <span><b>Cadeado:</b> Criptografia extra</span></div>
+                        </div>
+                    </div>
+                </div>
+                <p class="controls-info">Use as setas ◄ ► do teclado ou clique nas laterais para mover o Cypher.</p>
+                <button id="btn-close-how" class="cyber-btn small">ENTENDIDO</button>
+            </div>
+        </div>
+        <!-- Modal Sobre -->
+        <div id="modal-about" class="ui-layer hidden">
+            <div class="modal-card">
+                <h2>SOBRE O JOGO</h2>
+                <p style="margin-bottom: 15px; font-size: 0.95rem; line-height: 1.4;">
+                    O <b>Ciber-Runner</b> foi desenvolvido para mostrar sobre o que é Cibersegurança em forma de jogo!
+                </p>
+                <button id="btn-close-about" class="cyber-btn small">FECHAR</button>
+            </div>
+        </div>
+
+        <!-- Pop-up Educativo (Dicas de Ameaças e Power-ups) -->
+        <div id="educational-popup" class="ui-layer hidden">
+            <div class="edu-card">
+                <h3 id="edu-title">DICA DE SEGURANÇA</h3>
+                <p id="edu-text" style="margin-bottom: 20px; font-size: 1rem; line-height: 1.4;"></p>
+                <button id="btn-close-edu" class="cyber-btn small">CONTINUAR</button>
+            </div>
+        </div>
+
+        <!-- Controles para Dispositivos Móveis -->
+        <div id="touch-controls" class="hidden">
+            <button id="btn-touch-left" class="touch-btn">◄ ESQUERDA</button>
+            <button id="btn-touch-right" class="touch-btn">DIREITA ►</button>
+        </div>
+    </div>
+
+    <script src="/static/js/game.js"></script>
+</body>
+</html>
