@@ -34,7 +34,10 @@ def get_highscore():
 @app.route('/api/highscore', methods=['POST'])
 def update_highscore():
     data = request.get_json() or {}
-    new_score = int(data.get('score', 0))
+    try:
+        new_score = int(data.get('score', 0))
+    except (TypeError, ValueError):
+        new_score = 0
     scores = load_scores()
     
     if new_score > scores.get('highscore', 0):
@@ -45,4 +48,4 @@ def update_highscore():
     return jsonify({"status": "ok", "highscore": scores.get('highscore', 0)})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=False)
