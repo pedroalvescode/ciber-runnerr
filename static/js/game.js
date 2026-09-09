@@ -248,6 +248,7 @@ class Game {
     }
 
     setupEventListeners() {
+        
         window.addEventListener('keydown', (e) => {
             if (!this.isRunning || this.isPausedForEdu) return;
 
@@ -258,8 +259,15 @@ class Game {
             }
         });
 
-        document.getElementById('btn-touch-left').addEventListener('click', () => this.moveLane(-1));
-        document.getElementById('btn-touch-right').addEventListener('click', () => this.moveLane(1));
+        document.getElementById('btn-touch-left').addEventListener('click', () => {
+            if (!this.isRunning || this.isPausedForEdu) return;
+            this.moveLane(-1);
+        });
+
+        document.getElementById('btn-touch-right').addEventListener('click', () => {
+            if (!this.isRunning || this.isPausedForEdu) return;
+            this.moveLane(1);
+        });
 
         document.getElementById('btn-play').addEventListener('click', () => {
             sounds.init();
@@ -302,17 +310,28 @@ class Game {
         });
     }
 
-    async fetchHighScore() {
-        try {
-            const res = await fetch('/api/highscore');
-            const data = await res.json();
-            this.highScore = data.highscore || 0;
-            const localHigh = localStorage.getItem('ciber_runner_highscore') || 0;
-            if (localHigh > this.highScore) this.highScore = parseInt(localHigh);
-        } catch (e) {
-            this.highScore = parseInt(localStorage.getItem('ciber_runner_highscore') || 0);
+async fetchHighScore() {
+    try {
+        const res = await fetch('/api/highscore');
+        const data = await res.json();
+
+        this.highScore = parseInt(data.highscore || '0', 10);
+
+        const localHigh = parseInt(
+            localStorage.getItem('ciber_runner_highscore') || '0',
+            10
+        );
+
+        if (localHigh > this.highScore) {
+            this.highScore = localHigh;
         }
+    } catch (e) {
+        this.highScore = parseInt(
+            localStorage.getItem('ciber_runner_highscore') || '0',
+            10
+        );
     }
+}
 
     async saveHighScore() {
         localStorage.setItem('ciber_runner_highscore', this.highScore);
@@ -336,6 +355,7 @@ class Game {
         this.lives = 3;
         this.speed = 6;
         this.currentLane = 1;
+        this.frame = 0;
         this.playerX = this.laneX[1];
         this.obstacles = [];
         this.powerups = [];
@@ -343,6 +363,8 @@ class Game {
         this.shieldActive = false;
         this.shieldTimer = 0;
         this.shownTips.clear();
+
+        document.getElementById('touch-controls').classList.remove('hidden');
 
         this.isRunning = true;
         this.isPausedForEdu = false;
@@ -384,10 +406,13 @@ class Game {
             const type = types[Math.floor(Math.random() * types.length)];
             this.obstacles.push({
                 x: this.laneX[lane],
+                baseX: this.laneX[lane],
                 y: -50,
                 lane: lane,
                 type: type,
-                size: 45
+                size: 45,
+                movementOffset: Math.random() * Math.PI * 2,
+                movementSpeed: Math.random() * 0.08 + 0.04
             });
         }
 
@@ -438,9 +463,30 @@ class Game {
         this.spawnEntities();
 
         // Obstáculos
+// Obstáculos
         for (let i = this.obstacles.length - 1; i >= 0; i--) {
             const obs = this.obstacles[i];
+
+            // Movimento vertical
             obs.y += this.speed;
+
+            // Comportamento diferente para cada ameaça
+            if (obs.type === 'virus') {
+                // Vírus: cai reto e um pouco mais rápido
+                obs.y += 0.8;
+
+            } else if (obs.type === 'phishing') {
+                // Phishing: tenta se mover lateralmente
+                obs.x = obs.baseX + Math.sin(
+                    this.frame * obs.movementSpeed + obs.movementOffset
+                ) * 70;
+
+            } else if (obs.type === 'lock_open') {
+                // Senha fraca: movimento lateral menor e mais irregular
+                obs.x = obs.baseX + Math.sin(
+                    this.frame * obs.movementSpeed * 1.8 + obs.movementOffset
+                ) * 35;
+            }
 
             const distY = Math.abs(obs.y - this.playerY);
             const distX = Math.abs(obs.x - this.playerX);
